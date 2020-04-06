@@ -157,16 +157,22 @@ class Base:
         window.blit(self.image, (self.x2, self.y))
 
 
-def draw_window(window, bird):
+def draw_window(window, bird, pipes, base):
     window.blit(background_image, (0, 0))
+    for pipe in pipes:
+        pipe.draw(window)
+    base.draw(window)
     bird.draw(window)
     pygame.display.update()
 
 
 def main():
-    bird = Bird(200, 200)
+    bird = Bird(230, 350)
+    base = Base(730)
+    pipes = [Pipe(600)]
     window = pygame.display.set_mode((window_width, window_height))
     clock = pygame.time.Clock()
+    score = 0
     run = True
 
     while run:
@@ -174,8 +180,31 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        bird.move()
-        draw_window(window, bird)
+
+        add_pipe = False
+        remove = []
+        for pipe in pipes:
+            if pipe.collide(bird):
+                pass
+
+            if pipe.x + pipe.pipe_top.get_width() < 0:
+                remove.append(pipe)
+
+            if not pipe.passed and pipe.x < bird.x:
+                pipe.passed = True
+                add_pipe = True
+            
+            pipe.move()
+        
+        if add_pipe:
+            score += 1
+            pipes.append(Pipe(600))
+
+        for r in remove:
+            pipes.remove(r)
+
+        base.move()
+        draw_window(window, bird, pipes, base)
 
     pygame.quit()
     quit()
